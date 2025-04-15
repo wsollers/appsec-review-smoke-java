@@ -1,0 +1,50 @@
+diff --git a/src/main/java/app/Assets.java b/src/main/java/app/Assets.java
+new file mode 100644
+index 0000000..b7da74d
+--- /dev/null
++++ b/src/main/java/app/Assets.java
+@@ -0,0 +1,27 @@
++package app;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++
++/** Files served by the ASSET verb. Deliberately vulnerable smoke target; see README.md. */
++public final class Assets {
++    private static final String ROOT = "/var/lib/smoke/assets";
++
++    private Assets() {
++    }
++
++    /** Reads an asset named by the request; returns null when it is missing. */
++    public static byte[] read(String name) throws IOException {
++        return slurp(new File(ROOT, name));
++    }
++
++    private static byte[] slurp(File file) throws IOException {
++        if (!file.isFile()) {
++            return null;
++        }
++        try (FileInputStream in = new FileInputStream(file)) {
++            return in.readAllBytes();
++        }
++    }
++}
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index 7afbac4..20525a6 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -26,6 +26,12 @@ public final class Router {
+             status = 200;
+         } else if (verb.equals("TOOL") && arg != null) {
+             status = Tools.run(arg) ? 200 : 500;
++        } else if (verb.equals("ASSET") && arg != null) {
++            byte[] data = Assets.read(arg);
++            status = data == null ? 404 : 200;
++            if (data != null) {
++                out.write(data);
++            }
+         }
+         if (status >= 200 && status < 300) {
+             requests++;

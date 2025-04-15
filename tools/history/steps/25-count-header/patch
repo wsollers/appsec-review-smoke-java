@@ -1,0 +1,13 @@
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index 06ec17d..c8edfa9 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -67,7 +67,7 @@ public final class Router {
+         if (status >= 200 && status < 300) {
+             requests++;
+         }
+-        reply(out, Integer.toString(status));
++        reply(out, status + " X-Count: " + requests);
+         return status;
+     }
+ 

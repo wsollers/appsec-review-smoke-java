@@ -1,0 +1,43 @@
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index 517a9a6..9e38593 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -56,6 +56,9 @@ public final class Router {
+             } catch (NumberFormatException error) {
+                 status = 400;
+             }
++        } else if (verb.equals("DEFAULTS")) {
++            reply(out, Xml.parseDefaults());
++            status = 200;
+         }
+         if (status >= 200 && status < 300) {
+             requests++;
+diff --git a/src/main/java/app/Xml.java b/src/main/java/app/Xml.java
+index e2cd188..0c6f1b0 100644
+--- a/src/main/java/app/Xml.java
++++ b/src/main/java/app/Xml.java
+@@ -10,6 +10,8 @@ import org.xml.sax.SAXException;
+ 
+ /** XML handling for the XML verb. Deliberately vulnerable smoke target; see README.md. */
+ public final class Xml {
++    private static final String DEFAULTS = "<defaults><limit>20</limit></defaults>";
++
+     private Xml() {
+     }
+ 
+@@ -23,4 +25,15 @@ public final class Xml {
+             throw new IOException("malformed document", error);
+         }
+     }
++
++    /** Parses the built-in defaults document and returns its root element name. */
++    public static String parseDefaults() throws IOException {
++        try {
++            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
++            Document document = factory.newDocumentBuilder().parse(new InputSource(new StringReader(DEFAULTS)));
++            return document.getDocumentElement().getTagName();
++        } catch (ParserConfigurationException | SAXException error) {
++            throw new IOException("built-in defaults are malformed", error);
++        }
++    }
+ }

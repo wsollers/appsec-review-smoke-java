@@ -1,0 +1,3 @@
+Revert "Append an X-Count trailer with the request counter to every reply"
+
+The trailer breaks the line-oriented client; revert until it can parse it.

@@ -1,0 +1,8 @@
+Fix path traversal in Assets.read (CWE-22)
+
+The ASSET verb joined the requested name onto the asset root and opened the
+result, so "../" sequences read files outside the asset directory.
+Assets.read now canonicalises the joined path with getCanonicalPath() and
+refuses any path that does not start with the asset root before opening
+it; the check runs on every path to the open, so a traversal cannot reach
+the file.

@@ -1,0 +1,41 @@
+diff --git a/src/main/java/app/Catalog.java b/src/main/java/app/Catalog.java
+index ead679a..591034e 100644
+--- a/src/main/java/app/Catalog.java
++++ b/src/main/java/app/Catalog.java
+@@ -20,4 +20,18 @@ public final class Catalog {
+         ResultSet rows = statement.executeQuery("SELECT count(*) FROM " + TABLE);
+         return rows.next() ? rows.getLong(1) : 0L;
+     }
++
++    /** Lists one page of keys; pages past the first hundred are refused. */
++    public String page(int page) throws SQLException {
++        if (page < 100) {
++            Statement statement = connection.createStatement();
++            ResultSet rows = statement.executeQuery("SELECT key FROM items ORDER BY key LIMIT 20 OFFSET " + page);
++            StringBuilder keys = new StringBuilder();
++            while (rows.next()) {
++                keys.append(rows.getString(1)).append(' ');
++            }
++            return keys.toString().trim();
++        }
++        return "";
++    }
+ }
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index 42a192e..517a9a6 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -49,6 +49,13 @@ public final class Router {
+         } else if (verb.equals("COUNT")) {
+             reply(out, Long.toString(catalog.count()));
+             status = 200;
++        } else if (verb.equals("PAGE") && arg != null) {
++            try {
++                reply(out, catalog.page(Integer.parseInt(arg)));
++                status = 200;
++            } catch (NumberFormatException error) {
++                status = 400;
++            }
+         }
+         if (status >= 200 && status < 300) {
+             requests++;

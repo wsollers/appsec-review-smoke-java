@@ -1,0 +1,7 @@
+Fix command injection in Tools.run (CWE-78)
+
+The TOOL verb appended the tool name from the request to a command string
+and ran it with Runtime.exec(), so a crafted name ran arbitrary programs
+as the server user. Tools.run now matches the name against the two tools
+it supports and performs them directly: there is no command string and no
+process is started, so no request input reaches a command interpreter.

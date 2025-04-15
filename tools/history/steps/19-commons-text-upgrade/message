@@ -1,0 +1,7 @@
+Upgrade commons-text from 1.9 to 1.10.0
+
+commons-text 1.9 evaluates script, dns and url lookups during
+StringSubstitutor interpolation, so untrusted template text can run code
+(CVE-2022-42889, GHSA-599f-7c49-w659). The report templates are meant to
+use it, so the declared version is raised to 1.10.0, which disables those
+lookups by default.

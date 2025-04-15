@@ -1,0 +1,66 @@
+diff --git a/src/main/java/app/Catalog.java b/src/main/java/app/Catalog.java
+new file mode 100644
+index 0000000..ead679a
+--- /dev/null
++++ b/src/main/java/app/Catalog.java
+@@ -0,0 +1,23 @@
++package app;
++
++import java.sql.Connection;
++import java.sql.ResultSet;
++import java.sql.SQLException;
++import java.sql.Statement;
++
++/** Catalog queries for the COUNT and PAGE verbs. Deliberately vulnerable smoke target; see README.md. */
++public final class Catalog {
++    private static final String TABLE = "items";
++    private final Connection connection;
++
++    public Catalog(Connection connection) {
++        this.connection = connection;
++    }
++
++    /** Counts the catalog rows. */
++    public long count() throws SQLException {
++        Statement statement = connection.createStatement();
++        ResultSet rows = statement.executeQuery("SELECT count(*) FROM " + TABLE);
++        return rows.next() ? rows.getLong(1) : 0L;
++    }
++}
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index 20525a6..513a8fb 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -4,18 +4,21 @@ import java.io.IOException;
+ import java.io.OutputStream;
+ import java.nio.charset.StandardCharsets;
+ import java.sql.Connection;
++import java.sql.SQLException;
+ 
+ /** Dispatches one request line on its verb. Deliberately vulnerable smoke target; see README.md. */
+ public final class Router {
+     private final Connection connection;
++    private final Catalog catalog;
+     private int requests;
+ 
+     public Router(Connection connection) {
+         this.connection = connection;
++        this.catalog = new Catalog(connection);
+     }
+ 
+     /** Handles one request line and returns an HTTP-like status code. */
+-    public int route(String line, OutputStream out) throws IOException {
++    public int route(String line, OutputStream out) throws IOException, SQLException {
+         int status = 400;
+         String request = line;
+         int split = request.indexOf(' ');
+@@ -32,6 +35,9 @@ public final class Router {
+             if (data != null) {
+                 out.write(data);
+             }
++        } else if (verb.equals("COUNT")) {
++            reply(out, Long.toString(catalog.count()));
++            status = 200;
+         }
+         if (status >= 200 && status < 300) {
+             requests++;

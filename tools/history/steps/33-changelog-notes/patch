@@ -1,0 +1,16 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index d27e17b..9255b95 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -10,6 +10,11 @@ All notable changes to this project are documented in this file. The format foll
+ - Smoke server with PING, TOOL, ASSET and COUNT verbs.
+ - Maven manifest declaring log4j-core, snakeyaml, commons-io and commons-text.
+ 
++### Changed
++
++- Compiles with `maven.compiler.release` 21.
++- `tools/make-history.sh` reproduces the commit graph.
++
+ ### Security
+ 
+ - 2026-01-11: Upgraded commons-text from 1.9 to 1.10.0 (CVE-2022-42889, GHSA-599f-7c49-w659, remote code execution through StringSubstitutor interpolation).

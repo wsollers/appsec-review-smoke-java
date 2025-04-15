@@ -1,0 +1,25 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index dc68de1..44d3ef4 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -9,3 +9,7 @@ All notable changes to this project are documented in this file. The format foll
+ 
+ - Smoke server with PING, TOOL, ASSET and COUNT verbs.
+ - Maven manifest declaring log4j-core, snakeyaml, commons-io and commons-text.
++
++### Security
++
++- 2026-01-11: Upgraded commons-text from 1.9 to 1.10.0 (CVE-2022-42889, GHSA-599f-7c49-w659, remote code execution through StringSubstitutor interpolation).
+diff --git a/pom.xml b/pom.xml
+index 6f8eee1..6598f87 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -31,7 +31,7 @@
+     <dependency>
+       <groupId>org.apache.commons</groupId>
+       <artifactId>commons-text</artifactId>
+-      <version>1.9</version>
++      <version>1.10.0</version>
+     </dependency>
+   </dependencies>
+ </project>

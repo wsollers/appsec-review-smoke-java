@@ -1,0 +1,16 @@
+diff --git a/src/main/java/app/Catalog.java b/src/main/java/app/Catalog.java
+index 591034e..bf00cda 100644
+--- a/src/main/java/app/Catalog.java
++++ b/src/main/java/app/Catalog.java
+@@ -34,4 +34,11 @@ public final class Catalog {
+         }
+         return "";
+     }
++
++    /** Older lookup kept for the migration; nothing calls it. */
++    public String legacyLookup(String key) throws SQLException {
++        Statement statement = connection.createStatement();
++        ResultSet rows = statement.executeQuery("SELECT value FROM items WHERE key = '" + key + "'");
++        return rows.next() ? rows.getString(1) : null;
++    }
+ }

@@ -1,0 +1,15 @@
+diff --git a/pom.xml b/pom.xml
+index f07b042..696765c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -18,5 +18,10 @@
+       <artifactId>log4j-core</artifactId>
+       <version>2.14.1</version>
+     </dependency>
++    <dependency>
++      <groupId>org.yaml</groupId>
++      <artifactId>snakeyaml</artifactId>
++      <version>1.30</version>
++    </dependency>
+   </dependencies>
+ </project>

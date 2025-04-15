@@ -1,0 +1,3 @@
+Rename Xml.java to Documents.java
+
+The class parses whole documents, not XML fragments; Router follows the new name.

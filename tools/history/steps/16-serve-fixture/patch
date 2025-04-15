@@ -1,0 +1,12 @@
+diff --git a/src/main/java/app/Main.java b/src/main/java/app/Main.java
+index 90937d6..5526fdf 100644
+--- a/src/main/java/app/Main.java
++++ b/src/main/java/app/Main.java
+@@ -23,6 +23,7 @@ public final class Main {
+             if (line != null) {
+                 router.route(line, socket.getOutputStream());
+             }
++            new Server(connection, new FileStore()).serve(listener);
+         }
+     }
+ }

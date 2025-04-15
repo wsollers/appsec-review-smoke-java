@@ -1,0 +1,42 @@
+diff --git a/src/main/java/app/Xml.java b/src/main/java/app/Documents.java
+similarity index 96%
+rename from src/main/java/app/Xml.java
+rename to src/main/java/app/Documents.java
+index 0c6f1b0..4f545c8 100644
+--- a/src/main/java/app/Xml.java
++++ b/src/main/java/app/Documents.java
+@@ -9,10 +9,10 @@ import org.xml.sax.InputSource;
+ import org.xml.sax.SAXException;
+ 
+ /** XML handling for the XML verb. Deliberately vulnerable smoke target; see README.md. */
+-public final class Xml {
++public final class Documents {
+     private static final String DEFAULTS = "<defaults><limit>20</limit></defaults>";
+ 
+-    private Xml() {
++    private Documents() {
+     }
+ 
+     /** Parses a document submitted by the client and returns its root element name. */
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index ef14c1d..06ec17d 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -40,7 +40,7 @@ public final class Router {
+             reply(out, found ? "MATCH" : "NOMATCH");
+             status = 200;
+         } else if (verb.equals("XML") && arg != null) {
+-            reply(out, Xml.parse(arg));
++            reply(out, Documents.parse(arg));
+             status = 200;
+         } else if (verb.equals("TOOL") && arg != null) {
+             status = Tools.run(arg) ? 200 : 500;
+@@ -61,7 +61,7 @@ public final class Router {
+                 status = 400;
+             }
+         } else if (verb.equals("DEFAULTS")) {
+-            reply(out, Xml.parseDefaults());
++            reply(out, Documents.parseDefaults());
+             status = 200;
+         }
+         if (status >= 200 && status < 300) {

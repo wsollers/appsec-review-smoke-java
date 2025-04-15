@@ -1,0 +1,3 @@
+Add an XML verb that parses a submitted document
+
+The reply is the root element name of the document the client sent.

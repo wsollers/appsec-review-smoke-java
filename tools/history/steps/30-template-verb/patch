@@ -1,0 +1,42 @@
+diff --git a/src/main/java/app/Assets.java b/src/main/java/app/Assets.java
+index e03d177..f680bd5 100644
+--- a/src/main/java/app/Assets.java
++++ b/src/main/java/app/Assets.java
+@@ -7,6 +7,7 @@ import java.io.IOException;
+ /** Files served by the ASSET verb. Deliberately vulnerable smoke target; see README.md. */
+ public final class Assets {
+     private static final String ROOT = "/var/lib/smoke/assets";
++    private static final String TEMPLATES = "/var/lib/smoke/templates";
+ 
+     private Assets() {
+     }
+@@ -20,6 +21,12 @@ public final class Assets {
+         return slurp(new File(canonical));
+     }
+ 
++    /** Reads a template named by the request after canonicalising its path. */
++    public static byte[] readTemplate(String name) throws IOException {
++        String canonical = new File(TEMPLATES, name).getCanonicalPath();
++        return slurp(new File(canonical));
++    }
++
+     private static byte[] slurp(File file) throws IOException {
+         if (!file.isFile()) {
+             return null;
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+index c8edfa9..4d00ea0 100644
+--- a/src/main/java/app/Router.java
++++ b/src/main/java/app/Router.java
+@@ -50,6 +50,12 @@ public final class Router {
+             if (data != null) {
+                 out.write(data);
+             }
++        } else if (verb.equals("TEMPLATE") && arg != null) {
++            byte[] data = Assets.readTemplate(arg);
++            status = data == null ? 404 : 200;
++            if (data != null) {
++                out.write(data);
++            }
+         } else if (verb.equals("COUNT")) {
+             reply(out, Long.toString(catalog.count()));
+             status = 200;

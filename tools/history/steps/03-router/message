@@ -1,0 +1,4 @@
+Add the request router with a PING verb
+
+Main accepts one connection, reads its first line and hands it to Router,
+which dispatches on the verb.

@@ -1,0 +1,78 @@
+diff --git a/src/main/java/app/Main.java b/src/main/java/app/Main.java
+new file mode 100644
+index 0000000..90937d6
+--- /dev/null
++++ b/src/main/java/app/Main.java
+@@ -0,0 +1,28 @@
++package app;
++
++import java.io.BufferedReader;
++import java.io.InputStreamReader;
++import java.net.ServerSocket;
++import java.net.Socket;
++import java.sql.Connection;
++import java.sql.DriverManager;
++
++/** Entry point of the smoke server: accepts one connection and routes its first line. */
++public final class Main {
++    private Main() {
++    }
++
++    public static void main(String[] args) throws Exception {
++        int port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
++        Connection connection = DriverManager.getConnection(System.getProperty("smoke.jdbc", "jdbc:sqlite:smoke.db"));
++        Router router = new Router(connection);
++        try (ServerSocket listener = new ServerSocket(port)) {
++            Socket socket = listener.accept();
++            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
++            String line = reader.readLine();
++            if (line != null) {
++                router.route(line, socket.getOutputStream());
++            }
++        }
++    }
++}
+diff --git a/src/main/java/app/Router.java b/src/main/java/app/Router.java
+new file mode 100644
+index 0000000..0417240
+--- /dev/null
++++ b/src/main/java/app/Router.java
+@@ -0,0 +1,38 @@
++package app;
++
++import java.io.IOException;
++import java.io.OutputStream;
++import java.nio.charset.StandardCharsets;
++import java.sql.Connection;
++
++/** Dispatches one request line on its verb. Deliberately vulnerable smoke target; see README.md. */
++public final class Router {
++    private final Connection connection;
++    private int requests;
++
++    public Router(Connection connection) {
++        this.connection = connection;
++    }
++
++    /** Handles one request line and returns an HTTP-like status code. */
++    public int route(String line, OutputStream out) throws IOException {
++        int status = 400;
++        String request = line;
++        int split = request.indexOf(' ');
++        String verb = split < 0 ? request : request.substring(0, split);
++        String arg = split < 0 ? null : request.substring(split + 1);
++        if (verb.equals("PING")) {
++            reply(out, "PONG");
++            status = 200;
++        }
++        if (status >= 200 && status < 300) {
++            requests++;
++        }
++        reply(out, Integer.toString(status));
++        return status;
++    }
++
++    private static void reply(OutputStream out, String text) throws IOException {
++        out.write((text + "\n").getBytes(StandardCharsets.UTF_8));
++    }
++}

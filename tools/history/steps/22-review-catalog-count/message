@@ -1,0 +1,7 @@
+Review the Catalog.count query report
+
+A scanner flagged the executeQuery in Catalog.count as SQL built by string
+concatenation. The only concatenated operand is the TABLE constant, a
+compile-time string that no request data can reach, so the statement text
+is fixed: not exploitable, and the query is unchanged. Documented the
+reasoning in a comment so the next reader does not reopen it.

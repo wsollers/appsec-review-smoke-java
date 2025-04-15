@@ -1,0 +1,44 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 44d3ef4..2404374 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -13,3 +13,4 @@ All notable changes to this project are documented in this file. The format foll
+ ### Security
+ 
+ - 2026-01-11: Upgraded commons-text from 1.9 to 1.10.0 (CVE-2022-42889, GHSA-599f-7c49-w659, remote code execution through StringSubstitutor interpolation).
++- 2026-01-28: Fixed command injection in `Tools.run` (CWE-78); tool names are now matched against a fixed list.
+diff --git a/src/main/java/app/Tools.java b/src/main/java/app/Tools.java
+index 1daa04d..74853e6 100644
+--- a/src/main/java/app/Tools.java
++++ b/src/main/java/app/Tools.java
+@@ -1,20 +1,20 @@
+ package app;
+ 
+-import java.io.IOException;
+-
+ /** Maintenance tools for the TOOL verb. Deliberately vulnerable smoke target; see README.md. */
+ public final class Tools {
+     private Tools() {
+     }
+ 
+-    /** Runs a maintenance tool named by the request and reports whether it succeeded. */
+-    public static boolean run(String name) throws IOException {
+-        Process process = Runtime.getRuntime().exec("/usr/libexec/smoke/" + name);
+-        try {
+-            return process.waitFor() == 0;
+-        } catch (InterruptedException error) {
+-            Thread.currentThread().interrupt();
+-            return false;
++    /** Runs one of the two maintenance tools; any other name is refused. */
++    public static boolean run(String name) {
++        if (name.equals("status")) {
++            System.out.println("ok");
++            return true;
++        }
++        if (name.equals("version")) {
++            System.out.println("smoke " + Runtime.version());
++            return true;
+         }
++        return false;
+     }
+ }

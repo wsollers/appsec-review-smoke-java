@@ -1,0 +1,16 @@
+diff --git a/pom.xml b/pom.xml
+index 2dfab7b..f07b042 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -12,4 +12,11 @@
+     <maven.compiler.source>21</maven.compiler.source>
+     <maven.compiler.target>21</maven.compiler.target>
+   </properties>
++  <dependencies>
++    <dependency>
++      <groupId>org.apache.logging.log4j</groupId>
++      <artifactId>log4j-core</artifactId>
++      <version>2.14.1</version>
++    </dependency>
++  </dependencies>
+ </project>

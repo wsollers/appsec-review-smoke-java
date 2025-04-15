@@ -1,0 +1,4 @@
+Add a TOOL verb that runs maintenance tools
+
+The tool name comes from the request and selects a helper under
+/usr/libexec/smoke.
