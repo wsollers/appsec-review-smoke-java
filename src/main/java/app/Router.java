@@ -26,6 +26,12 @@ public final class Router {
             status = 200;
         } else if (verb.equals("TOOL") && arg != null) {
             status = Tools.run(arg) ? 200 : 500;
+        } else if (verb.equals("ASSET") && arg != null) {
+            byte[] data = Assets.read(arg);
+            status = data == null ? 404 : 200;
+            if (data != null) {
+                out.write(data);
+            }
         }
         if (status >= 200 && status < 300) {
             requests++;
