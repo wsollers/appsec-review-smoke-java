@@ -4,18 +4,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /** Dispatches one request line on its verb. Deliberately vulnerable smoke target; see README.md. */
 public final class Router {
     private final Connection connection;
+    private final Catalog catalog;
     private int requests;
 
     public Router(Connection connection) {
         this.connection = connection;
+        this.catalog = new Catalog(connection);
     }
 
     /** Handles one request line and returns an HTTP-like status code. */
-    public int route(String line, OutputStream out) throws IOException {
+    public int route(String line, OutputStream out) throws IOException, SQLException {
         int status = 400;
         String request = line;
         int split = request.indexOf(' ');
@@ -32,6 +35,9 @@ public final class Router {
             if (data != null) {
                 out.write(data);
             }
+        } else if (verb.equals("COUNT")) {
+            reply(out, Long.toString(catalog.count()));
+            status = 200;
         }
         if (status >= 200 && status < 300) {
             requests++;
