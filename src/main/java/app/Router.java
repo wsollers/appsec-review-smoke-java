@@ -27,6 +27,9 @@ public final class Router {
         if (verb.equals("PING")) {
             reply(out, "PONG");
             status = 200;
+        } else if (verb.equals("XML") && arg != null) {
+            reply(out, Xml.parse(arg));
+            status = 200;
         } else if (verb.equals("TOOL") && arg != null) {
             status = Tools.run(arg) ? 200 : 500;
         } else if (verb.equals("ASSET") && arg != null) {
