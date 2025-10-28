@@ -49,6 +49,13 @@ public final class Router {
         } else if (verb.equals("COUNT")) {
             reply(out, Long.toString(catalog.count()));
             status = 200;
+        } else if (verb.equals("PAGE") && arg != null) {
+            try {
+                reply(out, catalog.page(Integer.parseInt(arg)));
+                status = 200;
+            } catch (NumberFormatException error) {
+                status = 400;
+            }
         }
         if (status >= 200 && status < 300) {
             requests++;

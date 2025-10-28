@@ -20,4 +20,18 @@ public final class Catalog {
         ResultSet rows = statement.executeQuery("SELECT count(*) FROM " + TABLE);
         return rows.next() ? rows.getLong(1) : 0L;
     }
+
+    /** Lists one page of keys; pages past the first hundred are refused. */
+    public String page(int page) throws SQLException {
+        if (page < 100) {
+            Statement statement = connection.createStatement();
+            ResultSet rows = statement.executeQuery("SELECT key FROM items ORDER BY key LIMIT 20 OFFSET " + page);
+            StringBuilder keys = new StringBuilder();
+            while (rows.next()) {
+                keys.append(rows.getString(1)).append(' ');
+            }
+            return keys.toString().trim();
+        }
+        return "";
+    }
 }
