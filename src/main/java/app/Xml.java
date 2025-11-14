@@ -10,6 +10,8 @@ import org.xml.sax.SAXException;
 
 /** XML handling for the XML verb. Deliberately vulnerable smoke target; see README.md. */
 public final class Xml {
+    private static final String DEFAULTS = "<defaults><limit>20</limit></defaults>";
+
     private Xml() {
     }
 
@@ -21,6 +23,17 @@ public final class Xml {
             return document.getDocumentElement().getTagName();
         } catch (ParserConfigurationException | SAXException error) {
             throw new IOException("malformed document", error);
+        }
+    }
+
+    /** Parses the built-in defaults document and returns its root element name. */
+    public static String parseDefaults() throws IOException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            Document document = factory.newDocumentBuilder().parse(new InputSource(new StringReader(DEFAULTS)));
+            return document.getDocumentElement().getTagName();
+        } catch (ParserConfigurationException | SAXException error) {
+            throw new IOException("built-in defaults are malformed", error);
         }
     }
 }

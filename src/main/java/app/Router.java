@@ -56,6 +56,9 @@ public final class Router {
             } catch (NumberFormatException error) {
                 status = 400;
             }
+        } else if (verb.equals("DEFAULTS")) {
+            reply(out, Xml.parseDefaults());
+            status = 200;
         }
         if (status >= 200 && status < 300) {
             requests++;
