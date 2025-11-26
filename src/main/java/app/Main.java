@@ -23,6 +23,7 @@ public final class Main {
             if (line != null) {
                 router.route(line, socket.getOutputStream());
             }
+            new Server(connection, new FileStore()).serve(listener);
         }
     }
 }
