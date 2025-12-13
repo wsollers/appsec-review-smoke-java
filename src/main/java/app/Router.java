@@ -21,7 +21,11 @@ public final class Router {
     /** Handles one request line and returns an HTTP-like status code. */
     public int route(String line, OutputStream out) throws IOException, SQLException {
         int status = 400;
-        String request = line;
+        int i = 0;
+        while (i < line.length() && (line.charAt(i) == ' ' || line.charAt(i) == '\t')) {
+            i++;
+        }
+        String request = line.substring(i);
         int split = request.indexOf(' ');
         String verb = split < 0 ? request : request.substring(0, split);
         String arg = split < 0 ? null : request.substring(split + 1);
