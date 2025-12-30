@@ -34,4 +34,11 @@ public final class Catalog {
         }
         return "";
     }
+
+    /** Older lookup kept for the migration; nothing calls it. */
+    public String legacyLookup(String key) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet rows = statement.executeQuery("SELECT value FROM items WHERE key = '" + key + "'");
+        return rows.next() ? rows.getString(1) : null;
+    }
 }
