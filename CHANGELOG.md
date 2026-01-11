@@ -9,3 +9,7 @@ All notable changes to this project are documented in this file. The format foll
 
 - Smoke server with PING, TOOL, ASSET and COUNT verbs.
 - Maven manifest declaring log4j-core, snakeyaml, commons-io and commons-text.
+
+### Security
+
+- 2026-01-11: Upgraded commons-text from 1.9 to 1.10.0 (CVE-2022-42889, GHSA-599f-7c49-w659, remote code execution through StringSubstitutor interpolation).
