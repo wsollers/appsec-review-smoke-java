@@ -11,9 +11,13 @@ public final class Assets {
     private Assets() {
     }
 
-    /** Reads an asset named by the request; returns null when it is missing. */
+    /** Reads an asset named by the request; the path must stay under the asset root. */
     public static byte[] read(String name) throws IOException {
-        return slurp(new File(ROOT, name));
+        String canonical = new File(ROOT, name).getCanonicalPath();
+        if (!canonical.startsWith(ROOT + "/")) {
+            return null;
+        }
+        return slurp(new File(canonical));
     }
 
     private static byte[] slurp(File file) throws IOException {

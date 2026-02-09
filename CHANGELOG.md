@@ -14,3 +14,4 @@ All notable changes to this project are documented in this file. The format foll
 
 - 2026-01-11: Upgraded commons-text from 1.9 to 1.10.0 (CVE-2022-42889, GHSA-599f-7c49-w659, remote code execution through StringSubstitutor interpolation).
 - 2026-01-28: Fixed command injection in `Tools.run` (CWE-78); tool names are now matched against a fixed list.
+- 2026-02-09: Fixed path traversal in `Assets.read` (CWE-22); paths are canonicalised and confined to the asset root.
