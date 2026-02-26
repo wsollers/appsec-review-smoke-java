@@ -15,6 +15,8 @@ public final class Catalog {
     }
 
     /** Counts the catalog rows. */
+    // The table name is a compile-time constant, so no request data reaches the query
+    // (reviewed 2026-02; see the commit log).
     public long count() throws SQLException {
         Statement statement = connection.createStatement();
         ResultSet rows = statement.executeQuery("SELECT count(*) FROM " + TABLE);
