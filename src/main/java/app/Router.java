@@ -40,7 +40,7 @@ public final class Router {
             reply(out, found ? "MATCH" : "NOMATCH");
             status = 200;
         } else if (verb.equals("XML") && arg != null) {
-            reply(out, Xml.parse(arg));
+            reply(out, Documents.parse(arg));
             status = 200;
         } else if (verb.equals("TOOL") && arg != null) {
             status = Tools.run(arg) ? 200 : 500;
@@ -61,7 +61,7 @@ public final class Router {
                 status = 400;
             }
         } else if (verb.equals("DEFAULTS")) {
-            reply(out, Xml.parseDefaults());
+            reply(out, Documents.parseDefaults());
             status = 200;
         }
         if (status >= 200 && status < 300) {

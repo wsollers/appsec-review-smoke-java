@@ -9,10 +9,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /** XML handling for the XML verb. Deliberately vulnerable smoke target; see README.md. */
-public final class Xml {
+public final class Documents {
     private static final String DEFAULTS = "<defaults><limit>20</limit></defaults>";
 
-    private Xml() {
+    private Documents() {
     }
 
     /** Parses a document submitted by the client and returns its root element name. */
