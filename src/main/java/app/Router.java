@@ -67,7 +67,7 @@ public final class Router {
         if (status >= 200 && status < 300) {
             requests++;
         }
-        reply(out, Integer.toString(status));
+        reply(out, status + " X-Count: " + requests);
         return status;
     }
 
