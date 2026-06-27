@@ -7,6 +7,7 @@ import java.io.IOException;
 /** Files served by the ASSET verb. Deliberately vulnerable smoke target; see README.md. */
 public final class Assets {
     private static final String ROOT = "/var/lib/smoke/assets";
+    private static final String TEMPLATES = "/var/lib/smoke/templates";
 
     private Assets() {
     }
@@ -17,6 +18,12 @@ public final class Assets {
         if (!canonical.startsWith(ROOT + "/")) {
             return null;
         }
+        return slurp(new File(canonical));
+    }
+
+    /** Reads a template named by the request after canonicalising its path. */
+    public static byte[] readTemplate(String name) throws IOException {
+        String canonical = new File(TEMPLATES, name).getCanonicalPath();
         return slurp(new File(canonical));
     }
 

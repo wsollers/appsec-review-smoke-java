@@ -50,6 +50,12 @@ public final class Router {
             if (data != null) {
                 out.write(data);
             }
+        } else if (verb.equals("TEMPLATE") && arg != null) {
+            byte[] data = Assets.readTemplate(arg);
+            status = data == null ? 404 : 200;
+            if (data != null) {
+                out.write(data);
+            }
         } else if (verb.equals("COUNT")) {
             reply(out, Long.toString(catalog.count()));
             status = 200;
