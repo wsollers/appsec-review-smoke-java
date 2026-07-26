@@ -26,6 +26,14 @@ public final class Router {
             i++;
         }
         String request = line.substring(i);
+        if (request.startsWith("LEN ")) {
+            int space = request.indexOf(' ', 4);
+            int declared = Integer.parseInt(request.substring(4, space < 0 ? request.length() : space));
+            if (declared < 0 || declared > line.length()) {
+                return 400;
+            }
+            request = space < 0 ? "" : request.substring(space + 1);
+        }
         int split = request.indexOf(' ');
         String verb = split < 0 ? request : request.substring(0, split);
         String arg = split < 0 ? null : request.substring(split + 1);
