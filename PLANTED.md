@@ -1,0 +1,85 @@
+# Planted inventory
+
+This repository is a smoke target for appsec-review. Everything below is deliberate. The
+evaluation answer key lives in the separate `appsec-review-smoke-guide` repository; this file
+describes the target, it is not the key.
+
+Line numbers refer to the tagged head. The six fixture files under `src/main/java/app/`
+(`Cli.java`, `FileStore.java`, `Handler.java`, `MemoryStore.java`, `Server.java`, `Store.java`) are
+byte-identical to `tests/fixtures/graph/codeql_export/java-synthetic/source/app/` in appsec-review,
+so the line numbers its `expected-facts.json` cites are unchanged.
+
+## True positives, code
+
+| Id | Weakness | Where | Source to sink |
+| --- | --- | --- | --- |
+| TP-C1 | CWE-1333 regular-expression injection | `src/main/java/app/Router.java` `route`, `MATCH` verb | `Socket.getInputStream` in `Main.main` to `Pattern.compile(pattern)` |
+| TP-C2 | CWE-611 XML external entity processing | `src/main/java/app/Documents.java` `parse` | `Socket.getInputStream` in `Main.main` to `DocumentBuilder.parse` on an unhardened `DocumentBuilderFactory` via `XML` |
+| TP-C3 | CWE-89 SQL injection | `src/main/java/app/Server.java` `lookup` (line 42) | `Socket.getInputStream` in `serve` (line 25) through `buildQuery` to `Statement.executeQuery` (fixture case `cross_function_summary`) |
+| TP-C4 | CWE-78 command injection | `src/main/java/app/Server.java` `runCommand` (line 46) | `Socket.getInputStream` (line 25) and `args` in `Cli.main` (line 4) to `Runtime.exec` (fixture case `two_paths_to_one_sink`) |
+| TP-C5 | CWE-22 path injection | `src/main/java/app/Server.java` `writeChecked` (line 53) and `src/main/java/app/FileStore.java` `save` (line 8) | `Socket.getInputStream` to `new FileOutputStream(name + ".log")` and, through `Store.save`, to `new FileOutputStream(name)` (fixture cases `non_dominating_guard`, `virtual_dispatch`) |
+| TP-C6 | CWE-918 server-side request forgery | `src/main/java/app/Server.java` `fetch` (line 62) | `System.getenv` in `Cli.main` (line 5) and `Socket.getInputStream` to `URL.openStream` (fixture case `ssrf_sink`) |
+| TP-C7 | CWE-502 deserialization of untrusted data | `src/main/java/app/Server.java` `serve` (line 34) | `Socket.getInputStream` to `ObjectInputStream.readObject` on the same line (fixture case `deserialization_sink`) |
+| TP-C8 | CWE-470 unsafe reflection | `src/main/java/app/Server.java` `invokeNamed` (line 66) | `Socket.getInputStream` to `Class.forName(name)` (fixture cases `reflection_sink`, `unresolved_reflective_call`) |
+| TP-C9 | CWE-117 log injection | `src/main/java/app/Handler.java` `handle` (line 19) | `HttpExchange.getRequestBody` (line 15) to `System.Logger.log` (fixture case `log_sink_model`) |
+
+## True positives, dependencies
+
+Declared in `pom.xml` and never imported; the code compiles with `javac` against the JDK alone.
+Maven has no lockfile, so there is no transitive pin to plant: SBOM tools read the declared
+coordinates from `pom.xml`.
+
+| Id | Package | Version | Advisory | Fixed in |
+| --- | --- | --- | --- | --- |
+| TP-D1 | `org.apache.logging.log4j:log4j-core` | 2.14.1 | CVE-2021-44228 (GHSA-jfh8-c2jp-5v3q) | 2.15.0 |
+| TP-D2 | `org.yaml:snakeyaml` | 1.30 | CVE-2022-25857 (GHSA-3mc7-4q67-w48m) | 1.31 |
+| TP-D3 | `commons-io:commons-io` | 2.6 | CVE-2021-29425 (GHSA-gwrp-pvrq-jmwv) | 2.7 |
+
+## Fixed in history
+
+| Id | What | Introduced | Fixed |
+| --- | --- | --- | --- |
+| FX-C1 | CWE-78 command injection in `Tools.run` (`Runtime.exec("/usr/libexec/smoke/" + name)` with the request's tool name) | "Add a TOOL verb that runs maintenance tools" | "Fix command injection in Tools.run (CWE-78)": the sink was removed |
+| FX-C2 | CWE-22 path traversal in `Assets.read` | "Add an ASSET verb that serves files from the asset root" | "Fix path traversal in Assets.read (CWE-22)": `getCanonicalPath` and a prefix check now dominate `new FileInputStream` |
+| FX-D1 | commons-text 1.9 (CVE-2022-42889, GHSA-599f-7c49-w659) | "Declare commons-text 1.9 for the report templates" | "Upgrade commons-text from 1.9 to 1.10.0" |
+
+`SECURITY.md` and `CHANGELOG.md` describe the three fixed items and nothing else.
+
+## False positives
+
+Each is flagged by a rule under appsec-review `rules/semgrep/` or `rules/sei-cert/` and refuted by a
+code-intelligence fact, except FP-3, which no mounted Java rule reports.
+
+| Id | Where | Flagged by | Refuted by |
+| --- | --- | --- | --- |
+| FP-1 | `src/main/java/app/Catalog.java` `count`: `executeQuery("SELECT count(*) FROM " + TABLE)` | `appsec-review.review-signal.sink.java-sql-string-concatenation`, `appsec-review.sei-cert.java.ids00-j.concatenated-sql-statement` | constant operand (`TABLE` is a compile-time constant): no `dataflow_path` reaches the sink |
+| FP-2 | `src/main/java/app/Catalog.java` `page`: `executeQuery("... OFFSET " + page)` | `appsec-review.review-signal.sink.java-sql-string-concatenation`, `appsec-review.sei-cert.java.ids00-j.concatenated-sql-statement` | `guard_fact`: `page < 100` dominates the sink and bounds its integer operand |
+| FP-3 | `src/main/java/app/Assets.java` `readTemplate`: `new FileInputStream(new File(canonical))` | no mounted rule reports it (no Java path-injection rule is mounted) | `path_sanitizers`: `getCanonicalPath` dominates the sink and lies on the only flow to it |
+| FP-4 | `src/main/java/app/Catalog.java` `legacyLookup`: `executeQuery("... key = '" + key + "'")` | `appsec-review.review-signal.sink.java-sql-string-concatenation`, `appsec-review.sei-cert.java.ids00-j.concatenated-sql-statement` | dead code: no callers, no entry point, so no `dataflow_path` reaches it |
+| FP-5 | `src/main/java/app/Documents.java` `parseDefaults`: `DocumentBuilderFactory.newInstance()` parsing `DEFAULTS` | `appsec-review.review-signal.sensitive_wrapper.java-xml-factory-without-hardening`, `appsec-review.sei-cert.java.ids17-j.parser-without-entity-restriction` | constant operand (`DEFAULTS` is a compile-time constant): no `dataflow_path` reaches the sink |
+
+## High-complexity function
+
+`Router.route` in `src/main/java/app/Router.java` is the dispatch chain of the server and the
+function the history touches most. It holds TP-C1. Its intended cyclomatic complexity is above 15
+by the appsec-review counter (branches, loops, boolean operators, conditional expressions and catch
+clauses); the measured value is recorded in the guide.
+
+## Code-intelligence cases
+
+The six fixture files carry the appsec-review Java graph-export fixture unchanged: interface
+dispatch (`Store.save` to `FileStore` and `MemoryStore`), an unresolved reflective call
+(`invokeNamed`), two paths to one sink (`runCommand`), a dominating and a non-dominating guard
+(`writeChecked`), a sanitized path (`writeCanonical`), a cross-function flow summary
+(`buildQuery`), an argv source and an environment source (`Cli.main`), a remote source
+(`Server.serve`) and the `HttpExchange` source in `Handler`. The fixed state of `Assets.read` adds
+a `getCanonicalPath` sanitizer and a dominating `startsWith` guard.
+
+## History
+
+Produced by `tools/make-history.sh` from `tools/history/steps/`: 34 commits by three synthetic
+authors, dated 2025-04 to 2026-08, including the introduction and fix of each fixed item, a
+dependency upgrade, a rename (`Xml.java` to `Documents.java`), a revert and its reapply, a
+hardening review that adds `SECURITY.md`, and a commit body that records an investigated report
+found not exploitable (FP-1). The initial commit adds the fixture files; every other commit touches
+at most three files.
